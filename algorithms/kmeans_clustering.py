@@ -18,7 +18,7 @@ __status__ = "Development"
 class KMeansClustering(GenericClustering):
     def clusterize_cluster(self, this_cluster):
         """
-        Function used to clusterize a cluster
+        Function used to clusterize a algorithms
         :param this_cluster:
             Cluster needed to be clusterized
         :return:

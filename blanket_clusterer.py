@@ -1,9 +1,9 @@
 import csv
 
-from cluster.agglomer_clustering import AgglomerClustering
-from cluster.birch_clustering import BirchClustering
-from cluster.dbscan_clustering import DBSCANClustering
-from cluster.kmeans_clustering import KMeansClustering
+from algorithms.agglomer_clustering import AgglomerClustering
+from algorithms.birch_clustering import BirchClustering
+from algorithms.dbscan_clustering import DBSCANClustering
+from algorithms.kmeans_clustering import KMeansClustering
 
 __author__ = "Konstantin Bogdanoski"
 __copyright__ = "Copyright 2020, BlanketClusterer"
@@ -29,7 +29,7 @@ class BlanketClusterer:
 
     :param clustering_type
         :type String, default="k-means"
-        Type of cluster to be done.
+        Type of algorithms to be done.
         Allowed types:
         `k-means`, `agglomerative`
 
@@ -119,7 +119,7 @@ class BlanketClusterer:
                 break
 
         if int(items_in_cluster) <= 5:
-            raise ValueError("Number of items in cluster must be greater than 5")
+            raise ValueError("Number of items in clusters must be greater than 5")
         if not 0 < int(max_depth) <= 6:
             raise ValueError("Invalid argument for max depth, choose in range 1-6")
         return

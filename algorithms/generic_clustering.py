@@ -150,7 +150,7 @@ class GenericClustering:
 
     def extract_coverages(self):
         """
-        Function that calculates the percentage for the color of the cluster
+        Function that calculates the percentage for the color of the algorithms
         Returns 0 if no group-names are given
         """
         if self.group_names is None:
@@ -163,7 +163,7 @@ class GenericClustering:
 
     def extract_vectors_as_array(self):
         """
-        Function used to extract the vectors in the needed format for the cluster
+        Function used to extract the vectors in the needed format for the algorithms
         """
         self.X = list()
         for line in self.vectors:

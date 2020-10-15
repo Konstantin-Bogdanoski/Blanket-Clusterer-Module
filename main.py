@@ -16,7 +16,7 @@ __status__ = "Development"
 # argv[2] - Number of clusters
 # argv[3] - Embeddings (model - Word2Vec, Node2Vec)
 # argv[4] - Names (key - value)
-# argv[5] - Number of items in cluster
+# argv[5] - Number of items in algorithms
 # argv[6] - Max depth
 # argv[7] - Output path
 # argv[8] - Group-names (left_border - right_border) - Optional
