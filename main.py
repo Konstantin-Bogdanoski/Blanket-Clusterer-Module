@@ -11,7 +11,7 @@ __maintainer__ = "Konstantin Bogdanoski"
 __email__ = "konstantin.b@live.com"
 __status__ = "Development"
 
-# Clusterer is called with arguements
+# Clusterer is called with arguments
 # argv[1] - Clustering type (KMeans, Agglomerative, ...)
 # argv[2] - Number of clusters
 # argv[3] - Embeddings (model - Word2Vec, Node2Vec)
@@ -25,7 +25,6 @@ __status__ = "Development"
 # the names of the clusters will be extracted based on the _Most common word_ algorithm
 
 if __name__ == "__main__":
-    print(sys.argv)
     clustering_type = sys.argv[1]
     num_clusters = sys.argv[2]
     embeddings = sys.argv[3]

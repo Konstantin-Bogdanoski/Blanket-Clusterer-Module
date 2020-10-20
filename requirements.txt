@@ -1,5 +1,5 @@
 Werkzeug~=1.0.1
-setuptools~=50.3.1
+setuptools~=50.3.2
 scikit-learn~=0.23.2
 gensim~=3.8.3
 rake_nltk
