@@ -15,6 +15,47 @@ __email__ = "konstantin.b@live.com"
 __status__ = "Development"
 
 
+def validate_constructor(n_clusters,
+                         clustering_type,
+                         embeddings,
+                         names,
+                         items_in_cluster,
+                         max_depth, group_names=None):
+    if int(n_clusters) <= 0:
+        raise ValueError("Invalid number of clusters")
+    if clustering_type not in ["k-means", "agglomerative", "dbscan", "birch"]:
+        raise ValueError("Invalid clustering type\nAllowed values: ['k-means', 'agglomerative', 'dbscan', 'birch']")
+    if embeddings is None:
+        raise ValueError("No embeddings model specified")
+    if names is None:
+        raise ValueError("No names .csv file specified")
+    file = open(names, "r")
+    reader = csv.reader(file, delimiter=",")
+    for row in reader:
+        if "key" not in row or "value" not in row:
+            raise ValueError("Names are not in specified format\n"
+                             "File must start with the following line:\n"
+                             "key,value\n"
+                             "and must be a .csv file")
+        break
+    if group_names is not None:
+        file = open(group_names, "r")
+        reader = csv.reader(file, delimiter=",")
+        for row in reader:
+            if "key" not in row or "value" not in row:
+                raise ValueError("Group names are not in specified format\n"
+                                 "File must start with the following line:\n"
+                                 "key,value\n"
+                                 "and must be a .csv file")
+            break
+
+    if int(items_in_cluster) <= 5:
+        raise ValueError("Number of items in clusters must be greater than 5")
+    if not 0 < int(max_depth) <= 6:
+        raise ValueError("Invalid argument for max depth, choose in range 1-6")
+    return
+
+
 class BlanketClusterer:
     """
     BlanketClusterer
@@ -73,8 +114,8 @@ class BlanketClusterer:
                  max_depth=6,
                  output_path="./output.json",
                  group_names=None):
-        self.validate_constructor(n_clusters, clustering_type, embeddings, names,
-                                  items_in_cluster, max_depth, group_names)
+        validate_constructor(n_clusters, clustering_type, embeddings, names,
+                             items_in_cluster, max_depth, group_names)
         self.n_clusters = int(n_clusters)
         self.clustering_type = clustering_type
         self.embeddings = embeddings
@@ -83,46 +124,6 @@ class BlanketClusterer:
         self.max_depth = int(max_depth)
         self.items_in_cluster = int(items_in_cluster)
         self.group_names = group_names
-
-    def validate_constructor(self, n_clusters,
-                             clustering_type,
-                             embeddings,
-                             names,
-                             items_in_cluster,
-                             max_depth, group_names=None):
-        if int(n_clusters) <= 0:
-            raise ValueError("Invalid number of clusters")
-        if clustering_type not in ["k-means", "agglomerative", "dbscan", "birch"]:
-            raise ValueError("Invalid clustering type\nAllowed values: ['k-means', 'agglomerative', 'dbscan', 'birch']")
-        if embeddings is None:
-            raise ValueError("No embeddings model specified")
-        if names is None:
-            raise ValueError("No names .csv file specified")
-        file = open(names, "r")
-        reader = csv.reader(file, delimiter=",")
-        for row in reader:
-            if "key" not in row or "value" not in row:
-                raise ValueError("Names are not in specified format\n"
-                                 "File must start with the following line:\n"
-                                 "key,value\n"
-                                 "and must be a .csv file")
-            break
-        if group_names is not None:
-            file = open(group_names, "r")
-            reader = csv.reader(file, delimiter=",")
-            for row in reader:
-                if "key" not in row or "value" not in row:
-                    raise ValueError("Group names are not in specified format\n"
-                                     "File must start with the following line:\n"
-                                     "key,value\n"
-                                     "and must be a .csv file")
-                break
-
-        if int(items_in_cluster) <= 5:
-            raise ValueError("Number of items in clusters must be greater than 5")
-        if not 0 < int(max_depth) <= 6:
-            raise ValueError("Invalid argument for max depth, choose in range 1-6")
-        return
 
     def clusterize(self):
         if self.clustering_type == "k-means":

@@ -25,7 +25,6 @@ __status__ = "Development"
 # the names of the clusters will be extracted based on the _Most common word_ algorithm
 
 if __name__ == "__main__":
-    print(sys.argv)
     clustering_type = sys.argv[1]
     num_clusters = sys.argv[2]
     embeddings = sys.argv[3]
