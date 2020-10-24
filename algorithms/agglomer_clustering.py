@@ -8,10 +8,10 @@ __author__ = "Konstantin Bogdanoski"
 __copyright__ = "Copyright 2020, BlanketClusterer"
 __credits__ = ["Konstantin Bogdanoski", "Prof. PhD. Dimitar Trajanov", "MSc. Kostadin Mishev"]
 __license__ = "MIT"
-__version__ = "0.0.1"
+__version__ = "1.0.0"
 __maintainer__ = "Konstantin Bogdanoski"
 __email__ = "konstantin.b@live.com"
-__status__ = "Development"
+__status__ = "Production"
 
 
 class AgglomerClustering(GenericClustering):
