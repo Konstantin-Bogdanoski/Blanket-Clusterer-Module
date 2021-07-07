@@ -3,12 +3,12 @@
 ### [EN]
 This repository contains the Python module which you can easily use to cluster your data.
 
-For more details, check out the [wiki](https://github.com/Konstantin-Bogdanoski/Blanket-Clusterer-Module/wiki)
+For more details, check out the [Docs](https://konstantin-bogdanoski.github.io/Blanket-Clusterer-Docs/#/)
 
 ### [MK]
 Ова repo ја содржи Python модулот, со кој ќе можете да ги кластерирате вашите податоци.
 
-За повеќе детали, погледнете го [wiki-то](https://github.com/Konstantin-Bogdanoski/Blanket-Clusterer-Module/wiki)
+За повеќе детали, погледнете ja [документацијата](https://konstantin-bogdanoski.github.io/Blanket-Clusterer-Docs/#/)
 
 ***
 
