@@ -1,16 +1,16 @@
 import copy
 import csv
+import pickle
 from datetime import datetime
 
 import numpy as np
-from gensim.models import Word2Vec
 from rake_nltk import Rake
 
 __author__ = "Konstantin Bogdanoski"
 __copyright__ = "Copyright 2020, BlanketClusterer"
 __credits__ = ["Konstantin Bogdanoski", "Prof. PhD. Dimitar Trajanov", "MSc. Kostadin Mishev"]
 __license__ = "MIT"
-__version__ = "1.0.0"
+__version__ = "2.0.0"
 __maintainer__ = "Konstantin Bogdanoski"
 __email__ = "konstantin.b@live.com"
 __status__ = "Production"
@@ -25,19 +25,16 @@ class GenericClustering:
         The number of clusters to be generated together with centroids.
 
     :param embeddings
-        path to embeddings model on file system.
+        path to embeddings on file system.
         it needs to be imported for the algorithm to operate.
 
-        Model must contain key-value pairs, where value is a
+        Embeddings must contain key-value pairs, where value is a
         matrix embedding. The key is needed for the name extraction.
-
-        Allowed models:
-        `Word2Vec`
 
     :param names
         path to `.csv` file containing the key-value pairs of
         names. The keys must be the same as the
-        keys in the embedding model.
+        keys in the embeddings.
 
     :param group_names
         path to `.csv` file containing key-value pairs of group names.
@@ -51,11 +48,8 @@ class GenericClustering:
 
     Attributes
     ----------
-    model
-        The model containing the embeddings
-
     vectors
-        vectors extracted from the model
+        vectors extracted from the embeddings
 
     X
         Vectors represented in the required format for using clustering algorithms
@@ -86,8 +80,18 @@ class GenericClustering:
         self.embeddings = embeddings
         self.names = names
         self.group_names = group_names
-        self.model = Word2Vec.load(embeddings)
-        self.vectors = dict()
+        with open(embeddings, 'rb') as read:
+            self.vectors = pickle.load(read)
+
+        self.reversed_vectors = dict()
+        for key, value in self.vectors.items():
+            self.reversed_vectors[hash(np.array2string(value))] = key
+
+        self.arrays = []
+        for item in self.vectors.values():
+            self.arrays.append(list(item))
+
+        self.total_missing_items = 0
         self.items_in_cluster = items_in_cluster
         self.max_depth = max_depth
         self.output_path = output
@@ -111,15 +115,6 @@ class GenericClustering:
                 self.nums_count[key] = 0
 
         self.color_constant = 360 / len(self.nums_count)
-
-    def extract_vectors(self):
-        """
-        Function used to extract the vectors from the model
-        """
-        self.vectors = dict()
-        for value in self.model.wv.vectors:
-            key = self.model.wv.most_similar(positive=[value], topn=1)[0]
-            self.vectors[key] = value
 
     def extract_names(self):
         """
@@ -171,6 +166,23 @@ class GenericClustering:
         self.X = np.array(self.X, dtype=float)
         return
 
+    def get_most_similar_key(self, array):
+        hashed_array = hash(np.array2string(array))
+        if hashed_array in self.reversed_vectors.keys():
+            return self.reversed_vectors[hashed_array]
+        else:
+            # Find the most similar vector, and retrieve the corresponding key
+            target_arrays = np.array(self.arrays)
+            similarity = np.sqrt(
+                np.sum((target_arrays / target_arrays.sum(axis=1)[:, np.newaxis] - array / np.sum(array)) ** 2, axis=1))
+            similarity[np.isnan(similarity)] = similarity[0] + 1
+            result = target_arrays[similarity.argmin()]
+            hashed_result = hash(np.array2string(result))
+            self.reversed_vectors[hashed_array] = self.reversed_vectors[hashed_result]
+            self.total_missing_items += 1
+            print(np.array2string(array))
+            return self.reversed_vectors[hashed_array]
+
     def colorize_cluster(self, curr_cluster):
         """
         If no group_names are provided, no colorization technique will be done
@@ -191,9 +203,8 @@ class GenericClustering:
 
         all_keys = []
         for value in curr_cluster:
-            embedding = np.array(value, dtype=np.float32)
-            # TODO: Remove second [0]
-            key = self.model.wv.most_similar(positive=[embedding], topn=1)[0][0]
+            value = np.array(value, dtype=np.float32)
+            key = self.get_most_similar_key(value)
             all_keys.append(str(key))
 
         for code in all_keys:
@@ -223,10 +234,8 @@ class GenericClustering:
         """
         if self.group_names is None:
             return 0
-
         embedding = np.array(code, dtype=np.float32)
-        # TODO: Remove second [0]
-        code = self.model.wv.most_similar(positive=[embedding], topn=1)[0][0]
+        code = self.get_most_similar_key(embedding)
         coverage = copy.deepcopy(self.color_constant)
         final_coverage = 0
         for key in self.nums_count:
@@ -254,8 +263,7 @@ class GenericClustering:
         name = str()
         for lname in currCluster:
             embed_name = np.array(lname, dtype=np.float32)
-            # TODO: Remove second [0]
-            key_name = self.model.wv.most_similar(positive=[embed_name], topn=1)[0][0]
+            key_name = self.get_most_similar_key(embed_name)
             if key_name in self.Y:
                 all_descriptions = (all_descriptions + " " + self.Y[key_name])
         r.extract_keywords_from_text(all_descriptions)
@@ -285,8 +293,7 @@ class GenericClustering:
         all_keys = []
         for item in curr_cluster:
             value = np.array(item, dtype=np.float32)
-            # TODO: Remove second [0]
-            key = self.model.wv.most_similar(positive=[value], topn=1)[0][0]
+            key = self.get_most_similar_key(value)
             all_keys.append(str(key))
         return self.count_sequences(all_keys)
 
@@ -354,9 +361,8 @@ class GenericClustering:
         last = this_cluster[-1]
         for entry in this_cluster:
             value = np.array(entry, dtype=np.float32)
-            # TODO: Remove second [0]
-            key = self.model.wv.most_similar(positive=[value], topn=1)[0][0].upper()
-            out.write(' { \n "id": "' + str(key) + '",')
+            key = str(self.get_most_similar_key(value)).upper()
+            out.write('{ \n "id": "' + str(key) + '",')
             if key in self.Y:
                 code_coverage = self.colorize_code(entry)
                 out.write('\n "label": "' + self.Y[key] + '"')
@@ -371,8 +377,9 @@ class GenericClustering:
             else:
                 out.write('\n "label": "NAME NOT FOUND"\n}')
                 missing_data.append(key)
-            if (entry - last).all():
+            if not ((entry == last).all()):
                 out.write(",")
+        out.flush()
         return
 
     def print_cluster_end(self, coverage, out):
@@ -387,7 +394,8 @@ class GenericClustering:
         if self.group_names is None:
             out.write("},\n")
         else:
-            out.write(',\n "coverage": ' + str(coverage) + "},\n")
+            out.write(',\n "coverage": ' + str(coverage) + "},")
+        out.flush()
         return
 
     def clusterize_cluster(self, this_cluster):
@@ -493,30 +501,35 @@ class GenericClustering:
                                                     iter5 = int(iter5) + 1
                                                     total_clusters += 1
                                                     coverage5 = self.colorize_cluster(cluss5[i5])
+                                                    print("[INFO] Writing cluster: ", total_clusters, end="\r")
                                                     self.print_cluster_end(coverage5, out)
                                             else:
                                                 self.print_cluster(cluss4[i4], cluster_names, id4, missing_data, out)
                                                 total_clusters += 1
                                             iter4 = int(iter4) + 1
                                             coverage4 = self.colorize_cluster(cluss4[i4])
+                                            print("[INFO] Writing cluster: ", total_clusters, end="\r")
                                             self.print_cluster_end(coverage4, out)
                                     else:
                                         self.print_cluster(cluss3[i3], cluster_names, id3, missing_data, out)
                                         total_clusters += 1
                                     iter3 = int(iter3) + 1
                                     coverage3 = self.colorize_cluster(cluss3[i3])
+                                    print("[INFO] Writing cluster: ", total_clusters, end="\r")
                                     self.print_cluster_end(coverage3, out)
                             else:
                                 self.print_cluster(cluss2[i2], cluster_names, id2, missing_data, out)
                                 total_clusters += 1
                             iter2 = int(iter2) + 1
                             coverage2 = self.colorize_cluster(cluss2[i2])
+                            print("[INFO] Writing cluster: ", total_clusters, end="\r")
                             self.print_cluster_end(coverage2, out)
                     else:
                         self.print_cluster(cluss1[i1], cluster_names, id1, missing_data, out)
                         total_clusters += 1
                     iter1 = int(iter1) + 1
                     coverage1 = self.colorize_cluster(cluss1[i1])
+                    print("[INFO] Writing cluster: ", total_clusters, end="\r")
                     self.print_cluster_end(coverage1, out)
             else:
                 self.print_cluster(clusters[entry], cluster_names, code_id, missing_data, out)
@@ -536,9 +549,8 @@ class GenericClustering:
         """
         Main function used to implement the clusterization
 
-        Output is written in a file specified in the output path
+        Output is Writing in a file specified in the output path
         """
-        self.extract_vectors()
         self.extract_names()
         self.extract_group_names()
         self.extract_nums_count()

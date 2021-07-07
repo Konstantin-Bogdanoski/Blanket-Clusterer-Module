@@ -9,7 +9,7 @@ __author__ = "Konstantin Bogdanoski"
 __copyright__ = "Copyright 2020, BlanketClusterer"
 __credits__ = ["Konstantin Bogdanoski", "Prof. PhD. Dimitar Trajanov", "MSc. Kostadin Mishev"]
 __license__ = "MIT"
-__version__ = "1.0.0"
+__version__ = "2.0.0"
 __maintainer__ = "Konstantin Bogdanoski"
 __email__ = "konstantin.b@live.com"
 __status__ = "Production"
@@ -26,7 +26,7 @@ def validate_constructor(n_clusters,
     if clustering_type not in ["k-means", "agglomerative", "dbscan", "birch"]:
         raise ValueError("Invalid clustering type\nAllowed values: ['k-means', 'agglomerative', 'dbscan', 'birch']")
     if embeddings is None:
-        raise ValueError("No embeddings model specified")
+        raise ValueError("No embeddings specified")
     if names is None:
         raise ValueError("No names .csv file specified")
     file = open(names, "r")

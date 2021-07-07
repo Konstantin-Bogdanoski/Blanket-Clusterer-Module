@@ -6,7 +6,7 @@ __author__ = "Konstantin Bogdanoski"
 __copyright__ = "Copyright 2020, BlanketClusterer"
 __credits__ = ["Konstantin Bogdanoski", "Prof. PhD. Dimitar Trajanov", "MSc. Kostadin Mishev"]
 __license__ = "MIT"
-__version__ = "1.0.0"
+__version__ = "2.0.0"
 __maintainer__ = "Konstantin Bogdanoski"
 __email__ = "konstantin.b@live.com"
 __status__ = "Production"
@@ -14,7 +14,7 @@ __status__ = "Production"
 # Clusterer is called with arguments
 # argv[1] - Clustering type (KMeans, Agglomerative, ...)
 # argv[2] - Number of clusters
-# argv[3] - Embeddings (model - Word2Vec, Node2Vec)
+# argv[3] - Embeddings (key - value, value is a numpy array)
 # argv[4] - Names (key - value)
 # argv[5] - Number of items in algorithms
 # argv[6] - Max depth
@@ -36,10 +36,11 @@ if __name__ == "__main__":
     if len(sys.argv) == 9:
         group_names = sys.argv[8]
 
-    print("[INFO] Beginning clustering")
+    print("[INFO] Initializing Blanket Clusterer")
     clusterer = BlanketClusterer(n_clusters=num_clusters, clustering_type=clustering_type,
                                  embeddings=embeddings, names=names, items_in_cluster=items_in_cluster,
                                  max_depth=max_depth, output_path=output_path,
                                  group_names=group_names)
+    print("[INFO] Blanket Clusterer initialized")
     clusterer.clusterize()
     print("[INFO] Clustering completed")
